@@ -7,3 +7,6 @@ class RequestLog(models.Model):
 
     class Meta:
         ordering = ["-timestamp"]
+
+class BlockedIP(models.Model):
+    ip_address = models.GenericIPAddressField()

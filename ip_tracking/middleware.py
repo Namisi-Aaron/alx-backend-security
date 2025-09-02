@@ -1,4 +1,5 @@
-from ip_tracking.models import RequestLog
+from django.http import HttpResponseForbidden
+from ip_tracking.models import RequestLog, BlockedIP
 
 class RequestLoggingMiddleware:
     '''
@@ -13,6 +14,9 @@ class RequestLoggingMiddleware:
         Process the request and log its details.
         """
         ip = self.get_client_ip(request)
+
+        if BlockedIP.objects.filter(ip_address=ip).exists():
+            return HttpResponseForbidden("403 Forbidden")
 
         RequestLog.objects.create(
             ip_address=ip,
