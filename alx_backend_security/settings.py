@@ -10,7 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ls99e4o+g#74n82qw6x=f(^+zd%1#)4$dqsn7w-jto-r(r=129'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -40,9 +44,11 @@ INSTALLED_APPS = [
 
     'ip_tracking',
     'rest_framework',
+    'ratelimit',
 ]
 
 MIDDLEWARE = [
+    
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -51,10 +57,25 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
+    'django_ip_geolocation.middleware.IpGeolocationMiddleware',
+
     'ip_tracking.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'alx_backend_security.urls'
+
+IP_GEOLOCATION_SETTINGS = {
+    'BACKEND': 'django_ip_geolocation.backends.IPGeolocationAPI',
+    'BACKEND_API_KEY': os.getenv('BACKEND_API_KEY'),
+    'BACKEND_EXTRA_PARAMS': {},
+    'BACKEND_USERNAME': os.getenv('BACKEND_USERNAME'),
+    'RESPONSE_HEADER': 'X-IP-Geolocation',
+    'ENABLE_REQUEST_HOOK': True,
+    'ENABLE_RESPONSE_HOOK': True,
+    'ENABLE_COOKIE': False,
+    'FORCE_IP_ADDR': None,
+    'USER_CONSENT_VALIDATOR': None
+}
 
 TEMPLATES = [
     {

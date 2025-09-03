@@ -13,18 +13,27 @@ class RequestLoggingMiddleware:
         """
         Process the request and log its details.
         """
-        ip = self.get_client_ip(request)
+        try:
 
-        if BlockedIP.objects.filter(ip_address=ip).exists():
-            return HttpResponseForbidden("403 Forbidden")
+            ip = self.get_client_ip(request)
+            geolocation = getattr(request, 'geolocation', None)
 
-        RequestLog.objects.create(
-            ip_address=ip,
-            path=request.path
-        )
+            if BlockedIP.objects.filter(ip_address=ip).exists():
+                return HttpResponseForbidden("403 Forbidden")
 
-        response = self.get_response(request)
-        return response
+            RequestLog.objects.create(
+                ip_address=ip,
+                path=request.path,
+                method=request.method,
+                city=getattr(geolocation, 'city', None),
+                country=getattr(geolocation, 'country_name', None)
+            )
+
+            response = self.get_response(request)
+            return response
+        
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
     def get_client_ip(self, request):
         """
